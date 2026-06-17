@@ -5,276 +5,276 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Let Me Claude That For You</title>
 <style>
-  :root {
-    --bg: #1a1714;
-    --panel: #262019;
-    --ink: #f5ede0;
-    --muted: #a8997f;
-    --rust: #d97757;
-    --line: #3a3128;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { width: 100%; max-width: 620px; }
+ :root {
+ --bg: #1a1714;
+ --panel: #262019;
+ --ink: #f5ede0;
+ --muted: #a8997f;
+ --rust: #d97757;
+ --line: #3a3128;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ html, body { height: 100%; }
+ body {
+ background: var(--bg);
+ color: var(--ink);
+ font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 24px;
+ line-height: 1.5;
+ -webkit-font-smoothing: antialiased;
+ }
+ .wrap { width: 100%; max-width: 620px; }
 
-  /* ---- Builder view ---- */
-  .eyebrow {
-    color: var(--rust);
-    font-size: 12px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-  h1 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-weight: 400;
-    font-size: clamp(34px, 7vw, 54px);
-    line-height: 1.04;
-    letter-spacing: -0.01em;
-    margin-bottom: 14px;
-  }
-  h1 .accent { font-style: italic; color: var(--rust); }
-  .sub { color: var(--muted); font-size: 15px; margin-bottom: 32px; max-width: 46ch; }
+ /* ---- Builder view ---- */
+ .eyebrow {
+ color: var(--rust);
+ font-size: 12px;
+ letter-spacing: 0.28em;
+ text-transform: uppercase;
+ margin-bottom: 18px;
+ }
+ h1 {
+ font-family: Georgia, "Times New Roman", serif;
+ font-weight: 400;
+ font-size: clamp(34px, 7vw, 54px);
+ line-height: 1.04;
+ letter-spacing: -0.01em;
+ margin-bottom: 14px;
+ }
+ h1 .accent { font-style: italic; color: var(--rust); }
+ .sub { color: var(--muted); font-size: 15px; margin-bottom: 32px; max-width: 46ch; }
 
-  label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-  .field {
-    display: flex; gap: 0; border: 1px solid var(--line);
-    background: var(--panel); border-radius: 2px; overflow: hidden;
-  }
-  .field input {
-    flex: 1; background: transparent; border: none; color: var(--ink);
-    font-family: inherit; font-size: 16px; padding: 16px 16px; outline: none;
-  }
-  .field input::placeholder { color: #6e6353; }
-  .field button {
-    border: none; background: var(--rust); color: #1a1714;
-    font-family: inherit; font-weight: 700; font-size: 14px;
-    padding: 0 22px; cursor: pointer; letter-spacing: 0.04em;
-    transition: background .15s;
-  }
-  .field button:hover { background: #e88a6c; }
-  .field button:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+ .field {
+ display: flex; gap: 0; border: 1px solid var(--line);
+ background: var(--panel); border-radius: 2px; overflow: hidden;
+ }
+ .field input {
+ flex: 1; background: transparent; border: none; color: var(--ink);
+ font-family: inherit; font-size: 16px; padding: 16px 16px; outline: none;
+ }
+ .field input::placeholder { color: #6e6353; }
+ .field button {
+ border: none; background: var(--rust); color: #1a1714;
+ font-family: inherit; font-weight: 700; font-size: 14px;
+ padding: 0 22px; cursor: pointer; letter-spacing: 0.04em;
+ transition: background .15s;
+ }
+ .field button:hover { background: #e88a6c; }
+ .field button:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
 
-  .result {
-    margin-top: 28px; border: 1px solid var(--line); border-radius: 2px;
-    background: var(--panel); padding: 18px; display: none;
-  }
-  .result.show { display: block; animation: rise .3s ease; }
-  @keyframes rise { from { opacity: 0; transform: translateY(6px);} to {opacity:1;transform:none;} }
-  .result label { margin-bottom: 10px; }
-  .linkrow { display: flex; gap: 10px; align-items: stretch; }
-  .linkrow .url {
-    flex: 1; background: var(--bg); border: 1px solid var(--line);
-    border-radius: 2px; padding: 12px 14px; font-size: 13px;
-    color: var(--rust); overflow-x: auto; white-space: nowrap; align-content:center;
-  }
-  .copybtn {
-    border: 1px solid var(--line); background: transparent; color: var(--ink);
-    font-family: inherit; font-size: 13px; padding: 0 16px; cursor: pointer;
-    border-radius: 2px; transition: all .15s; white-space: nowrap;
-  }
-  .copybtn:hover { border-color: var(--rust); color: var(--rust); }
-  .preview {
-    display: inline-block; margin-top: 14px; color: var(--muted);
-    font-size: 13px; text-decoration: none; border-bottom: 1px solid var(--line);
-    padding-bottom: 2px;
-  }
-  .preview:hover { color: var(--ink); border-color: var(--rust); }
-  .foot { margin-top: 40px; color: #6e6353; font-size: 12px; }
-  .foot a { color: var(--muted); }
+ .result {
+ margin-top: 28px; border: 1px solid var(--line); border-radius: 2px;
+ background: var(--panel); padding: 18px; display: none;
+ }
+ .result.show { display: block; animation: rise .3s ease; }
+ @keyframes rise { from { opacity: 0; transform: translateY(6px);} to {opacity:1;transform:none;} }
+ .result label { margin-bottom: 10px; }
+ .linkrow { display: flex; gap: 10px; align-items: stretch; }
+ .linkrow .url {
+ flex: 1; background: var(--bg); border: 1px solid var(--line);
+ border-radius: 2px; padding: 12px 14px; font-size: 13px;
+ color: var(--rust); overflow-x: auto; white-space: nowrap; align-content:center;
+ }
+ .copybtn {
+ border: 1px solid var(--line); background: transparent; color: var(--ink);
+ font-family: inherit; font-size: 13px; padding: 0 16px; cursor: pointer;
+ border-radius: 2px; transition: all .15s; white-space: nowrap;
+ }
+ .copybtn:hover { border-color: var(--rust); color: var(--rust); }
+ .preview {
+ display: inline-block; margin-top: 14px; color: var(--muted);
+ font-size: 13px; text-decoration: none; border-bottom: 1px solid var(--line);
+ padding-bottom: 2px;
+ }
+ .preview:hover { color: var(--ink); border-color: var(--rust); }
+ .foot { margin-top: 40px; color: #6e6353; font-size: 12px; }
+ .foot a { color: var(--muted); }
 
-  /* ---- Player view ---- */
-  #player {
-    display: none; position: fixed; inset: 0; background: var(--bg);
-    z-index: 50; flex-direction: column; align-items: center; justify-content: center;
-    padding: 24px;
-  }
-  #player.show { display: flex; }
-  .stage { width: 100%; max-width: 560px; }
-  .speech { font-size: 17px; color: var(--ink); min-height: 26px; margin-bottom: 22px; }
-  .speech .cap { color: var(--muted); }
-  .fakebar {
-    border: 1px solid var(--line); background: var(--panel); border-radius: 10px;
-    padding: 18px 18px 16px; box-shadow: 0 18px 50px rgba(0,0,0,.4);
-  }
-  .fakebar .tag { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--rust); margin-bottom: 12px; }
-  .typed {
-    font-size: 18px; min-height: 27px; color: var(--ink);
-    border-bottom: 1px solid var(--line); padding-bottom: 14px;
-  }
-  .cursor { display: inline-block; width: 8px; height: 20px; background: var(--rust); margin-left: 2px; vertical-align: -3px; animation: blink 1s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .sendrow { display: flex; justify-content: flex-end; margin-top: 14px; }
-  .fakesend {
-    background: var(--rust); color: #1a1714; border-radius: 6px; padding: 8px 16px;
-    font-weight: 700; font-size: 13px; transition: transform .1s; font-family: inherit;
-  }
-  .fakesend.press { transform: scale(.94); }
-  .status { margin-top: 22px; font-size: 13px; color: var(--muted); text-align: center; min-height: 18px; }
+ /* ---- Player view ---- */
+ #player {
+ display: none; position: fixed; inset: 0; background: var(--bg);
+ z-index: 50; flex-direction: column; align-items: center; justify-content: center;
+ padding: 24px;
+ }
+ #player.show { display: flex; }
+ .stage { width: 100%; max-width: 560px; }
+ .speech { font-size: 17px; color: var(--ink); min-height: 26px; margin-bottom: 22px; }
+ .speech .cap { color: var(--muted); }
+ .fakebar {
+ border: 1px solid var(--line); background: var(--panel); border-radius: 10px;
+ padding: 18px 18px 16px; box-shadow: 0 18px 50px rgba(0,0,0,.4);
+ }
+ .fakebar .tag { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--rust); margin-bottom: 12px; }
+ .typed {
+ font-size: 18px; min-height: 27px; color: var(--ink);
+ border-bottom: 1px solid var(--line); padding-bottom: 14px;
+ }
+ .cursor { display: inline-block; width: 8px; height: 20px; background: var(--rust); margin-left: 2px; vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+ @keyframes blink { 50% { opacity: 0; } }
+ .sendrow { display: flex; justify-content: flex-end; margin-top: 14px; }
+ .fakesend {
+ background: var(--rust); color: #1a1714; border-radius: 6px; padding: 8px 16px;
+ font-weight: 700; font-size: 13px; transition: transform .1s; font-family: inherit;
+ }
+ .fakesend.press { transform: scale(.94); }
+ .status { margin-top: 22px; font-size: 13px; color: var(--muted); text-align: center; min-height: 18px; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .cursor { animation: none; }
-    .result.show { animation: none; }
-  }
+ @media (prefers-reduced-motion: reduce) {
+ .cursor { animation: none; }
+ .result.show { animation: none; }
+ }
 </style>
 </head>
 <body>
-  <div class="wrap" id="builder">
-    <div class="eyebrow">For people who could have just asked</div>
-    <h1>Let me <span class="accent">Claude</span><br>that for you.</h1>
-    <p class="sub">Someone kept pinging you with a question they could have typed into Claude themselves? Generate a link that shows them exactly how it's done.</p>
+ <div class="wrap" id="builder">
+ <div class="eyebrow">For people who could have just asked</div>
+ <h1>Let me <span class="accent">Claude</span><br>that for you.</h1>
+ <p class="sub">Someone kept pinging you with a question they could have typed into Claude themselves? Generate a link that shows them exactly how it''s done.</p>
 
-    <label for="q">Their question</label>
-    <div class="field">
-      <input id="q" type="text" placeholder="e.g. how do I center a div" autocomplete="off" spellcheck="false">
-      <button id="make">Make link</button>
-    </div>
+ <label for="q">Their question</label>
+ <div class="field">
+ <input id="q" type="text" placeholder="e.g. how do I center a div" autocomplete="off" spellcheck="false">
+ <button id="make">Make link</button>
+ </div>
 
-    <div class="result" id="result">
-      <label>Your passive-aggressive link</label>
-      <div class="linkrow">
-        <div class="url" id="url"></div>
-        <button class="copybtn" id="copy">Copy</button>
-      </div>
-      <a class="preview" id="preview" href="#">Preview the animation →</a>
-    </div>
+ <div class="result" id="result">
+ <label>Your passive-aggressive link</label>
+ <div class="linkrow">
+ <div class="url" id="url"></div>
+ <button class="copybtn" id="copy">Copy</button>
+ </div>
+ <a class="preview" id="preview" href="#">Preview the animation →</a>
+ </div>
 
-    <p class="foot">An affectionate homage to letmegooglethatforyou.com. Not affiliated with Anthropic. <a id="reset" href="#">Start over</a></p>
-  </div>
+ <p class="foot">An affectionate homage to letmegooglethatforyou.com. Not affiliated with Anthropic. <a id="reset" href="#">Start over</a></p>
+ </div>
 
-  <div id="player">
-    <div class="stage">
-      <div class="speech" id="speech"></div>
-      <div class="fakebar">
-        <div class="tag">Claude</div>
-        <div class="typed"><span id="typed"></span><span class="cursor" id="cur"></span></div>
-        <div class="sendrow"><span class="fakesend" id="fakesend">Send ↑</span></div>
-      </div>
-      <div class="status" id="status"></div>
-    </div>
-  </div>
+ <div id="player">
+ <div class="stage">
+ <div class="speech" id="speech"></div>
+ <div class="fakebar">
+ <div class="tag">Claude</div>
+ <div class="typed"><span id="typed"></span><span class="cursor" id="cur"></span></div>
+ <div class="sendrow"><span class="fakesend" id="fakesend">Send ↑</span></div>
+ </div>
+ <div class="status" id="status"></div>
+ </div>
+ </div>
 
 <script>
 (function () {
-  var CLAUDE = "https://claude.ai/new?q=";
+ var CLAUDE = "https://claude.ai/new?q=";
 
-  var builder = document.getElementById('builder');
-  var player  = document.getElementById('player');
+ var builder = document.getElementById(''builder'');
+ var player = document.getElementById(''player'');
 
-  function buildLink(q) {
-    return location.origin + location.pathname + "?q=" + encodeURIComponent(q);
-  }
+ function buildLink(q) {
+ return location.origin + location.pathname + "?q=" + encodeURIComponent(q);
+ }
 
-  // ---------- Builder ----------
-  var input = document.getElementById('q');
-  var result = document.getElementById('result');
-  var urlEl = document.getElementById('url');
-  var copyBtn = document.getElementById('copy');
-  var preview = document.getElementById('preview');
+ // ---------- Builder ----------
+ var input = document.getElementById(''q'');
+ var result = document.getElementById(''result'');
+ var urlEl = document.getElementById(''url'');
+ var copyBtn = document.getElementById(''copy'');
+ var preview = document.getElementById(''preview'');
 
-  function makeLink() {
-    var q = input.value.trim();
-    if (!q) { input.focus(); return; }
-    var link = buildLink(q);
-    urlEl.textContent = link;
-    preview.href = link;
-    result.classList.add('show');
-  }
-  document.getElementById('make').addEventListener('click', makeLink);
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') makeLink(); });
+ function makeLink() {
+ var q = input.value.trim();
+ if (!q) { input.focus(); return; }
+ var link = buildLink(q);
+ urlEl.textContent = link;
+ preview.href = link;
+ result.classList.add(''show'');
+ }
+ document.getElementById(''make'').addEventListener(''click'', makeLink);
+ input.addEventListener(''keydown'', function (e) { if (e.key === ''Enter'') makeLink(); });
 
-  copyBtn.addEventListener('click', function () {
-    navigator.clipboard.writeText(urlEl.textContent).then(function () {
-      copyBtn.textContent = 'Copied';
-      setTimeout(function(){ copyBtn.textContent = 'Copy'; }, 1400);
-    });
-  });
+ copyBtn.addEventListener(''click'', function () {
+ navigator.clipboard.writeText(urlEl.textContent).then(function () {
+ copyBtn.textContent = ''Copied'';
+ setTimeout(function(){ copyBtn.textContent = ''Copy''; }, 1400);
+ });
+ });
 
-  preview.addEventListener('click', function (e) {
-    e.preventDefault();
-    runPlayer(input.value.trim(), true);
-  });
+ preview.addEventListener(''click'', function (e) {
+ e.preventDefault();
+ runPlayer(input.value.trim(), true);
+ });
 
-  document.getElementById('reset').addEventListener('click', function (e) {
-    e.preventDefault();
-    input.value = ''; result.classList.remove('show'); input.focus();
-  });
+ document.getElementById(''reset'').addEventListener(''click'', function (e) {
+ e.preventDefault();
+ input.value = ''''; result.classList.remove(''show''); input.focus();
+ });
 
-  // ---------- Player ----------
-  var speech = document.getElementById('speech');
-  var typed = document.getElementById('typed');
-  var cur = document.getElementById('cur');
-  var status = document.getElementById('status');
-  var fakesend = document.getElementById('fakesend');
+ // ---------- Player ----------
+ var speech = document.getElementById(''speech'');
+ var typed = document.getElementById(''typed'');
+ var cur = document.getElementById(''cur'');
+ var status = document.getElementById(''status'');
+ var fakesend = document.getElementById(''fakesend'');
 
-  function typeInto(target, text, speed, done) {
-    var i = 0;
-    (function step() {
-      target.textContent = text.slice(0, i);
-      i++;
-      if (i <= text.length) setTimeout(step, speed);
-      else done && done();
-    })();
-  }
+ function typeInto(target, text, speed, done) {
+ var i = 0;
+ (function step() {
+ target.textContent = text.slice(0, i);
+ i++;
+ if (i <= text.length) setTimeout(step, speed);
+ else done && done();
+ })();
+ }
 
-  function runPlayer(q, isPreview) {
-    builder.style.display = 'none';
-    player.classList.add('show');
-    speech.innerHTML = '';
-    typed.textContent = '';
-    status.textContent = '';
+ function runPlayer(q, isPreview) {
+ builder.style.display = ''none'';
+ player.classList.add(''show'');
+ speech.innerHTML = '''';
+ typed.textContent = '''';
+ status.textContent = '''';
 
-    var line1 = "This was so hard.";
-    typeInto(speech, line1, 38, function () {
-      setTimeout(function () {
-        cur.style.display = 'inline-block';
-        typeInto(typed, q, 55, function () {
-          setTimeout(function () {
-            cur.style.display = 'none';
-            fakesend.classList.add('press');
-            setTimeout(function(){ fakesend.classList.remove('press'); }, 160);
-            status.textContent = "Was that really so difficult?";
-            var dest = CLAUDE + encodeURIComponent(q);
-            setTimeout(function () {
-              if (isPreview) {
-                status.innerHTML = 'In a real link this now opens Claude. <a href="'+dest+'" target="_blank" rel="noopener" style="color:var(--rust)">Open it →</a>';
-                setTimeout(backToBuilder, 50);
-              } else {
-                window.location.href = dest;
-              }
-            }, 1100);
-          }, 450);
-        });
-      }, 500);
-    });
-  }
+ var line1 = "This was so hard.";
+ typeInto(speech, line1, 38, function () {
+ setTimeout(function () {
+ cur.style.display = ''inline-block'';
+ typeInto(typed, q, 55, function () {
+ setTimeout(function () {
+ cur.style.display = ''none'';
+ fakesend.classList.add(''press'');
+ setTimeout(function(){ fakesend.classList.remove(''press''); }, 160);
+ status.textContent = "Was that really so difficult?";
+ var dest = CLAUDE + encodeURIComponent(q);
+ setTimeout(function () {
+ if (isPreview) {
+ status.innerHTML = ''In a real link this now opens Claude. <a href="''+dest+''" target="_blank" rel="noopener" style="color:var(--rust)">Open it →</a>'';
+ setTimeout(backToBuilder, 50);
+ } else {
+ window.location.href = dest;
+ }
+ }, 1100);
+ }, 450);
+ });
+ }, 500);
+ });
+ }
 
-  function backToBuilder() {
-    setTimeout(function () {
-      player.classList.remove('show');
-      builder.style.display = '';
-    }, 2600);
-  }
+ function backToBuilder() {
+ setTimeout(function () {
+ player.classList.remove(''show'');
+ builder.style.display = '''';
+ }, 2600);
+ }
 
-  // ---------- Auto-run from shared link ----------
-  var params = new URLSearchParams(location.search);
-  var shared = params.get('q');
-  if (shared) {
-    runPlayer(shared, false);
-  } else {
-    input.focus();
-  }
+ // ---------- Auto-run from shared link ----------
+ var params = new URLSearchParams(location.search);
+ var shared = params.get(''q'');
+ if (shared) {
+ runPlayer(shared, false);
+ } else {
+ input.focus();
+ }
 })();
 </script>
 </body>
