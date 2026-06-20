@@ -1,2 +1,13 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/q/:id"
+  to = "/gag.html?id=:id"
+  status = 200
+
+[[redirects]]
+  from = "/leaderboard"
+  to = "/leaderboard.html"
+  status = 200

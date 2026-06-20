@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hall of Shame — Let Me AI That For Ya</title>
+<meta name="description" content="The people fielding the most AI-worthy questions so you don't have to.">
+<meta property="og:title" content="Hall of Shame 🏆">
+<meta property="og:description" content="Who's deflecting the most lazy questions? Find out.">
+<meta property="og:type" content="website">
+<style>
+:root {
+  --bg: #1a1714;
+  --panel: #262019;
+  --ink: #f5ede0;
+  --muted: #a8997f;
+  --rust: #d97757;
+  --line: #3a3128;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 24px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+}
+.wrap { width: 100%; max-width: 620px; }
+
+.eyebrow {
+  color: var(--rust); font-size: 12px;
+  letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 18px;
+}
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400; font-size: clamp(30px, 7vw, 50px);
+  line-height: 1.06; letter-spacing: -0.01em; margin-bottom: 12px;
+}
+h1 .accent { font-style: italic; color: var(--rust); }
+.sub {
+  color: var(--muted); font-size: 15px; margin-bottom: 40px; max-width: 44ch;
+}
+
+/* ---- Loading / Error ---- */
+.loading { color: var(--muted); font-size: 14px; padding: 20px 0; }
+.err-msg { color: var(--rust); font-size: 14px; padding: 20px 0; }
+
+/* ---- Leaderboard entries ---- */
+.board { display: flex; flex-direction: column; gap: 12px; }
+
+.entry {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 2px;
+  padding: 16px 20px;
+  animation: rise .3s ease;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.entry.rank-1 { border-color: rgba(217,119,87,0.4); }
+.entry.rank-2 { border-color: rgba(168,153,127,0.25); }
+.entry.rank-3 { border-color: rgba(168,153,127,0.15); }
+
+.rank-num {
+  font-size: 20px; font-family: Georgia, serif;
+  color: var(--muted); text-align: center; line-height: 1;
+}
+.rank-1 .rank-num { color: var(--rust); font-size: 22px; }
+
+.entry-body { min-width: 0; }
+.entry-name {
+  font-size: 15px; color: var(--ink); font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.entry-badge {
+  font-size: 11px; color: var(--rust); letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.entry-stats {
+  font-size: 12px; color: var(--muted); line-height: 1.4;
+}
+.entry-stats span { color: var(--ink); }
+
+.entry-count {
+  text-align: right; min-width: 52px;
+}
+.entry-count .num {
+  font-family: Georgia, serif; font-size: 28px;
+  color: var(--rust); line-height: 1;
+}
+.entry-count .label {
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ---- Empty state ---- */
+.empty {
+  border: 1px dashed var(--line); border-radius: 2px;
+  padding: 40px 24px; text-align: center; color: var(--muted);
+  font-size: 14px; line-height: 1.7;
+}
+.empty a { color: var(--rust); text-decoration: none; border-bottom: 1px solid var(--rust); }
+.empty a:hover { opacity: .8; }
+
+/* ---- Footer ---- */
+.foot {
+  margin-top: 40px; font-size: 12px; color: #6e6353;
+}
+.foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+.foot a:hover { color: var(--ink); }
+
+@media (max-width: 480px) {
+  h1 { font-size: 28px; }
+  .entry { grid-template-columns: 28px 1fr auto; gap: 10px; padding: 14px 14px; }
+  .entry-count .num { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Who's fielding the dumbest questions?</div>
+  <h1>Hall of <span class="accent">Shame</span></h1>
+  <p class="sub">These brave souls have deflected the most questions that could have been typed into an AI chatbot.</p>
+
+  <div class="board" id="board">
+    <div class="loading">Loading the shame rankings...</div>
+  </div>
+
+  <p class="foot">
+    <a href="/">← Back to making links</a>
+  </p>
+</div>
+
+<script>
+(function () {
+  var BADGES = [
+    '🏆 World-class colleagues',
+    '🥈 Working hard or hardly working',
+    '🥉 At least they ask nicely',
+    '4th — getting there',
+    '5th — honourable mention'
+  ];
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatCost(costUsd) {
+    var decimals = costUsd < 0.01 ? 6 : costUsd < 1 ? 4 : 2;
+    return '$' + costUsd.toFixed(decimals);
+  }
+
+  var board = document.getElementById('board');
+
+  fetch('/.netlify/functions/leaderboard')
+    .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+    .then(function (res) {
+      if (!res.ok) {
+        board.innerHTML = '<div class="err-msg">Couldn\'t load the leaderboard. Try again later.</div>';
+        return;
+      }
+
+      var top5 = res.data.leaderboard || [];
+
+      if (top5.length === 0) {
+        board.innerHTML =
+          '<div class="empty">' +
+          'Nobody\'s been tracked yet.<br>' +
+          'Add a name when you make a link and they\'ll show up here.' +
+          '<br><br><a href="/">Make a link now →</a>' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+      top5.forEach(function (entry, i) {
+        var rank = i + 1;
+        var badge = BADGES[i] || '';
+        html +=
+          '<div class="entry rank-' + rank + '">' +
+            '<div class="rank-num">' + rank + '</div>' +
+            '<div class="entry-body">' +
+              (badge ? '<div class="entry-badge">' + escHtml(badge) + '</div>' : '') +
+              '<div class="entry-name">' + escHtml(entry.name) + '</div>' +
+              '<div class="entry-stats">' +
+                '<span>' + parseInt(entry.total_tokens).toLocaleString() + '</span> tokens burned &bull; ' +
+                '<span>' + formatCost(parseFloat(entry.total_cost_usd)) + '</span> total cost' +
+              '</div>' +
+            '</div>' +
+            '<div class="entry-count">' +
+              '<div class="num">' + entry.query_count + '</div>' +
+              '<div class="label">question' + (entry.query_count !== 1 ? 's' : '') + '</div>' +
+            '</div>' +
+          '</div>';
+      });
+
+      board.innerHTML = html;
+    })
+    .catch(function () {
+      board.innerHTML = '<div class="err-msg">Network error loading leaderboard.</div>';
+    });
+
+})();
+</script>
+</body>
+</html>

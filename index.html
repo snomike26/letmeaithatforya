@@ -33,10 +33,11 @@ body {
   padding: 24px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  min-height: 100%;
 }
-.wrap { width: 100%; max-width: 620px; }
+.wrap { width: 100%; max-width: 620px; padding: 20px 0; }
 
-/* ---- Builder view ---- */
+/* ---- Header / eyebrow ---- */
 .eyebrow {
   color: var(--rust);
   font-size: 12px;
@@ -53,8 +54,50 @@ h1 {
   margin-bottom: 14px;
 }
 h1 .accent { font-style: italic; color: var(--rust); }
-.sub { color: var(--muted); font-size: 15px; margin-bottom: 32px; max-width: 46ch; }
+.sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; max-width: 46ch; }
 
+/* ---- Currency selector ---- */
+.currency-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.currency-label {
+  font-size: 11px; color: var(--muted); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-right: 4px;
+}
+.currency-btn {
+  background: transparent; border: 1px solid var(--line); color: var(--muted);
+  font-family: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer;
+  border-radius: 20px; transition: all .15s; letter-spacing: 0.04em;
+}
+.currency-btn:hover { border-color: var(--rust); color: var(--ink); }
+.currency-btn.active {
+  border-color: var(--rust); color: var(--rust); background: rgba(217,119,87,0.1);
+}
+
+/* ---- AI picker ---- */
+.picker-label {
+  font-size: 12px; color: var(--muted); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 10px; display: block;
+}
+.ai-picker {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;
+}
+.ai-pill {
+  background: transparent; border: 1px solid var(--line); color: var(--muted);
+  font-family: inherit; font-size: 13px; padding: 7px 16px; cursor: pointer;
+  border-radius: 20px; transition: all .15s; display: flex; align-items: center; gap: 6px;
+}
+.ai-pill:hover { border-color: var(--rust); color: var(--ink); }
+.ai-pill.active {
+  border-color: var(--rust); color: var(--ink); background: rgba(217,119,87,0.12);
+}
+.ai-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--line);
+}
+.ai-pill.active .dot { background: var(--rust); }
+
+/* ---- Query input ---- */
 label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
 .field {
   display: flex; gap: 0; border: 1px solid var(--line);
@@ -73,7 +116,19 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
 }
 .field button:hover { background: #e88a6c; }
 .field button:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.field button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* ---- Submitter field ---- */
+.sub-field-wrap { margin-top: 14px; }
+.sub-field-wrap input {
+  width: 100%; background: var(--panel); border: 1px solid var(--line);
+  color: var(--ink); font-family: inherit; font-size: 14px;
+  padding: 12px 14px; border-radius: 2px; outline: none;
+}
+.sub-field-wrap input::placeholder { color: #6e6353; }
+.sub-field-wrap input:focus { border-color: var(--rust); }
+
+/* ---- Result ---- */
 .result {
   margin-top: 28px; border: 1px solid var(--line); border-radius: 2px;
   background: var(--panel); padding: 18px; display: none;
@@ -95,6 +150,10 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
 }
 .copybtn:hover { border-color: var(--rust); color: var(--rust); }
 .copybtn.copied { border-color: #5a9e6f; color: #5a9e6f; }
+.cost-hint {
+  margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.5;
+}
+.cost-hint span { color: var(--ink); }
 .preview {
   display: inline-block; margin-top: 14px; color: var(--muted);
   font-size: 13px; text-decoration: none; border-bottom: 1px solid var(--line);
@@ -102,9 +161,20 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
   border-left: none; border-right: none; font-family: inherit;
 }
 .preview:hover { color: var(--ink); border-color: var(--rust); }
-.foot { margin-top: 40px; color: #6e6353; font-size: 12px; }
+
+/* ---- Error message ---- */
+.error-msg {
+  margin-top: 14px; padding: 12px 14px; background: rgba(217,119,87,0.1);
+  border: 1px solid rgba(217,119,87,0.3); border-radius: 2px;
+  font-size: 13px; color: var(--rust); display: none;
+}
+.error-msg.show { display: block; }
+
+/* ---- Footer ---- */
+.foot { margin-top: 40px; color: #6e6353; font-size: 12px; line-height: 1.8; }
 .foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
 .foot a:hover { color: var(--ink); }
+.foot-links { display: flex; gap: 16px; flex-wrap: wrap; }
 
 /* ---- Player view ---- */
 #player {
@@ -144,9 +214,7 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
 }
 @keyframes blink { 50% { opacity: 0; } }
 .sendrow { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-.model-badge {
-  font-size: 11px; color: var(--muted); letter-spacing: 0.06em;
-}
+.model-badge { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
 .fakesend {
   background: var(--rust); color: #1a1714; border-radius: 6px;
   padding: 8px 18px; font-weight: 700; font-size: 13px;
@@ -165,6 +233,7 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
   h1 { font-size: 28px; }
   .fakebar { padding: 14px 14px 12px; }
   .typed-wrap { font-size: 15px; }
+  .ai-pill { font-size: 12px; padding: 6px 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .cursor { animation: none; }
@@ -178,27 +247,68 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
 <div class="wrap" id="builder">
   <div class="eyebrow">For people who could have just asked</div>
   <h1>Let me <span class="accent">AI</span> that<br>for ya.</h1>
-  <p class="sub">Someone asked you something they could have typed into Claude in 5 seconds? Generate a link that shows them exactly how it's done.</p>
+  <p class="sub">Someone asked you something they could have typed into AI in 5 seconds? Generate a link that shows them exactly how it's done.</p>
 
+  <!-- Currency selector -->
+  <div class="currency-row">
+    <span class="currency-label">Currency:</span>
+    <button class="currency-btn active" data-currency="USD">$ USD</button>
+    <button class="currency-btn" data-currency="GBP">£ GBP</button>
+    <button class="currency-btn" data-currency="EUR">€ EUR</button>
+    <button class="currency-btn" data-currency="AED">د.إ AED</button>
+  </div>
+
+  <!-- AI picker -->
+  <span class="picker-label">Send them to</span>
+  <div class="ai-picker">
+    <button class="ai-pill active" data-ai="claude">
+      <span class="dot"></span>Claude
+    </button>
+    <button class="ai-pill" data-ai="chatgpt">
+      <span class="dot"></span>ChatGPT
+    </button>
+    <button class="ai-pill" data-ai="perplexity">
+      <span class="dot"></span>Perplexity
+    </button>
+    <button class="ai-pill" data-ai="gemini">
+      <span class="dot"></span>Gemini
+    </button>
+  </div>
+
+  <!-- Query input -->
   <label for="q">What did they ask you to do?</label>
   <div class="field">
     <input id="q" type="text" placeholder="e.g. write me an email to my boss" autocomplete="off" spellcheck="false">
     <button id="make">Make link</button>
   </div>
 
+  <!-- Optional submitter -->
+  <div class="sub-field-wrap">
+    <label for="submitter" style="margin-top:14px;">Who asked you? <span style="color:#6e6353;font-size:11px;">(optional — shows on leaderboard)</span></label>
+    <input id="submitter" type="text" placeholder="e.g. Dave from accounting" autocomplete="off" spellcheck="false">
+  </div>
+
+  <!-- Error message -->
+  <div class="error-msg" id="error-msg"></div>
+
+  <!-- Result -->
   <div class="result" id="result">
     <label>Send them this link</label>
     <div class="linkrow">
       <div class="url" id="url"></div>
       <button class="copybtn" id="copy">Copy</button>
     </div>
+    <div class="cost-hint" id="cost-hint"></div>
     <button class="preview" id="preview">Preview what they'll see →</button>
   </div>
 
   <p class="foot">
-    An affectionate homage to <a href="https://letmegooglethat.com" target="_blank" rel="noopener">letmegooglethat.com</a>.
-    Not affiliated with Anthropic.
-    <a id="reset" href="#">Start over</a>
+    <span class="foot-links">
+      <a href="https://letmegooglethat.com" target="_blank" rel="noopener">Inspired by LMGTFY</a>
+      <a href="/leaderboard">View leaderboard →</a>
+      <a id="reset" href="#">Start over</a>
+    </span>
+    <br>Not affiliated with Anthropic, OpenAI, Google, or Perplexity.
   </p>
 </div>
 
@@ -211,13 +321,13 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
         <div class="fakebar-dot"></div>
         <div class="fakebar-dot orange"></div>
         <div class="fakebar-dot"></div>
-        <span class="fakebar-label">Claude</span>
+        <span class="fakebar-label" id="fakebar-label">Claude</span>
       </div>
       <div class="typed-wrap">
         <span id="typed"></span><span class="cursor" id="cur" style="display:none"></span>
       </div>
       <div class="sendrow">
-        <span class="model-badge">claude sonnet</span>
+        <span class="model-badge" id="model-badge">claude sonnet</span>
         <span class="fakesend" id="fakesend">Send ↑</span>
       </div>
     </div>
@@ -227,7 +337,29 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
 
 <script>
 (function () {
-  var CLAUDE_URL = 'https://claude.ai/new?q=';
+  var AI_URLS = {
+    claude:     'https://claude.ai/new?q=',
+    chatgpt:    'https://chatgpt.com/?q=',
+    perplexity: 'https://www.perplexity.ai/?q=',
+    gemini:     'https://gemini.google.com/app?q='
+  };
+
+  var AI_LABELS = {
+    claude: 'Claude',
+    chatgpt: 'ChatGPT',
+    perplexity: 'Perplexity',
+    gemini: 'Gemini'
+  };
+
+  var AI_BADGE = {
+    claude: 'claude sonnet',
+    chatgpt: 'gpt-4o',
+    perplexity: 'perplexity ai',
+    gemini: 'gemini pro'
+  };
+
+  var CURRENCY_SYMBOLS = { USD: '$', GBP: '£', EUR: '€', AED: 'د.إ' };
+  var CURRENCY_RATES = { USD: 1.0, GBP: 0.79, EUR: 0.92, AED: 3.67 };
 
   var SPEECH_LINES = [
     'Oh wow, this was SO hard...',
@@ -246,85 +378,177 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
     'Was that really so difficult?',
     'Couldn\'t have done that yourself, could you.',
     'You\'re welcome. I guess.',
-    'Next time, just ask Claude. It\'s free.',
+    'Next time, just ask the AI. It\'s free.',
     'There. I hope you\'ve learned something today.',
-    'This moment brought to you by: not googling things.'
+    'This moment brought to you by: not thinking for yourself.'
   ];
 
-  var builder  = document.getElementById('builder');
-  var player   = document.getElementById('player');
-  var input    = document.getElementById('q');
-  var result   = document.getElementById('result');
-  var urlEl    = document.getElementById('url');
-  var copyBtn  = document.getElementById('copy');
+  // State
+  var selectedAi = 'claude';
+  var selectedCurrency = 'USD';
+  var currentShortUrl = '';
+  var currentEstTokens = 0;
+  var currentEstCostUsd = 0;
+
+  // Elements
+  var builder    = document.getElementById('builder');
+  var player     = document.getElementById('player');
+  var input      = document.getElementById('q');
+  var submitterEl = document.getElementById('submitter');
+  var result     = document.getElementById('result');
+  var urlEl      = document.getElementById('url');
+  var copyBtn    = document.getElementById('copy');
   var previewBtn = document.getElementById('preview');
-  var speech   = document.getElementById('speech');
-  var typedEl  = document.getElementById('typed');
-  var cur      = document.getElementById('cur');
-  var statusEl = document.getElementById('status');
-  var fakesend = document.getElementById('fakesend');
+  var costHint   = document.getElementById('cost-hint');
+  var errorMsg   = document.getElementById('error-msg');
+  var speech     = document.getElementById('speech');
+  var typedEl    = document.getElementById('typed');
+  var cur        = document.getElementById('cur');
+  var statusEl   = document.getElementById('status');
+  var fakesend   = document.getElementById('fakesend');
+  var fakebarLabel = document.getElementById('fakebar-label');
+  var modelBadge  = document.getElementById('model-badge');
+  var makeBtn     = document.getElementById('make');
 
   function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  function buildLink(q) {
-    return location.origin + location.pathname + '?q=' + encodeURIComponent(q);
+  function formatCost(costUsd, currency) {
+    var rate = CURRENCY_RATES[currency] || 1;
+    var symbol = CURRENCY_SYMBOLS[currency] || '$';
+    var converted = costUsd * rate;
+    return symbol + converted.toFixed(6);
   }
 
-  // ---- Builder ----
+  // ---- AI picker ----
+  document.querySelectorAll('.ai-pill').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.ai-pill').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedAi = btn.dataset.ai;
+    });
+  });
+
+  // ---- Currency selector ----
+  document.querySelectorAll('.currency-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.currency-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedCurrency = btn.dataset.currency;
+      // Update cost hint if result is showing
+      if (currentEstCostUsd && result.classList.contains('show')) {
+        updateCostHint();
+      }
+    });
+  });
+
+  function updateCostHint() {
+    if (!currentEstTokens) return;
+    costHint.innerHTML =
+      'Estimated cost: <span>' + formatCost(currentEstCostUsd, selectedCurrency) + '</span>' +
+      ' &bull; <span>' + currentEstTokens.toLocaleString() + ' tokens</span>';
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('show');
+  }
+
+  function clearError() {
+    errorMsg.classList.remove('show');
+    errorMsg.textContent = '';
+  }
+
+  // ---- Make link (calls backend) ----
   function makeLink() {
     var q = input.value.trim();
     if (!q) { input.focus(); return; }
-    urlEl.textContent = buildLink(q);
-    result.classList.add('show');
-    copyBtn.textContent = 'Copy';
-    copyBtn.classList.remove('copied');
+
+    clearError();
+    makeBtn.disabled = true;
+    makeBtn.textContent = 'Saving...';
+
+    fetch('/.netlify/functions/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: q,
+        submitter: submitterEl.value.trim() || null,
+        ai_target: selectedAi,
+        currency: selectedCurrency
+      })
+    })
+    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+    .then(function (res) {
+      makeBtn.disabled = false;
+      makeBtn.textContent = 'Make link';
+
+      if (!res.ok) {
+        showError(res.data.error || 'Something went wrong. Try again.');
+        return;
+      }
+
+      currentShortUrl = res.data.shortUrl;
+      currentEstTokens = res.data.est_tokens || 0;
+      currentEstCostUsd = res.data.est_cost_usd || 0;
+
+      urlEl.textContent = currentShortUrl;
+      copyBtn.textContent = 'Copy';
+      copyBtn.classList.remove('copied');
+      updateCostHint();
+      result.classList.add('show');
+    })
+    .catch(function (err) {
+      makeBtn.disabled = false;
+      makeBtn.textContent = 'Make link';
+      showError('Network error. Are you online?');
+    });
   }
 
-  document.getElementById('make').addEventListener('click', makeLink);
+  makeBtn.addEventListener('click', makeLink);
   input.addEventListener('keydown', function (e) { if (e.key === 'Enter') makeLink(); });
 
+  // ---- Copy button ----
   copyBtn.addEventListener('click', function () {
     var text = urlEl.textContent;
     if (!text) return;
     navigator.clipboard.writeText(text).then(function () {
       copyBtn.textContent = 'Copied ✓';
       copyBtn.classList.add('copied');
-      setTimeout(function () {
-        copyBtn.textContent = 'Copy';
-        copyBtn.classList.remove('copied');
-      }, 2000);
+      setTimeout(function () { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
     }).catch(function () {
-      // fallback for non-HTTPS / old browsers
       var ta = document.createElement('textarea');
       ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
+      ta.style.cssText = 'position:fixed;opacity:0;';
       document.body.appendChild(ta);
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
       copyBtn.textContent = 'Copied ✓';
       copyBtn.classList.add('copied');
-      setTimeout(function () {
-        copyBtn.textContent = 'Copy';
-        copyBtn.classList.remove('copied');
-      }, 2000);
+      setTimeout(function () { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
     });
   });
 
+  // ---- Preview button ----
   previewBtn.addEventListener('click', function (e) {
     e.preventDefault();
     var q = input.value.trim();
     if (!q) return;
-    runPlayer(q, true);
+    runPlayer(q, true, selectedAi);
   });
 
+  // ---- Reset ----
   document.getElementById('reset').addEventListener('click', function (e) {
     e.preventDefault();
     input.value = '';
+    submitterEl.value = '';
     result.classList.remove('show');
+    clearError();
+    currentShortUrl = '';
+    currentEstTokens = 0;
+    currentEstCostUsd = 0;
     input.focus();
   });
 
@@ -341,8 +565,8 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
   }
 
   // ---- Player ----
-  function runPlayer(q, isPreview) {
-    // Reset state
+  function runPlayer(q, isPreview, aiTarget) {
+    var ai = aiTarget || 'claude';
     builder.style.display = 'none';
     player.classList.add('show');
     speech.textContent = '';
@@ -350,43 +574,33 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
     statusEl.textContent = '';
     cur.style.display = 'none';
     fakesend.classList.remove('press');
+    fakebarLabel.textContent = AI_LABELS[ai] || 'Claude';
+    modelBadge.textContent = AI_BADGE[ai] || 'claude sonnet';
 
     var speechLine = pick(SPEECH_LINES);
     var doneLine   = pick(DONE_LINES);
 
-    // Step 1: type the snarky speech line
     typeInto(speech, speechLine, 32, function () {
-
-      // Step 2: pause, then show cursor in input and start typing the question
       setTimeout(function () {
         cur.style.display = 'inline-block';
-
         typeInto(typedEl, q, 60, function () {
-
-          // Step 3: pause at end of typing, then press send
           setTimeout(function () {
             cur.style.display = 'none';
             fakesend.classList.add('press');
-
             setTimeout(function () {
               fakesend.classList.remove('press');
-
-              // Step 4: show done line
               statusEl.textContent = doneLine;
-
-              // Step 5: redirect or show preview link
-              var dest = CLAUDE_URL + encodeURIComponent(q);
+              var dest = (AI_URLS[ai] || AI_URLS.claude) + encodeURIComponent(q);
               setTimeout(function () {
                 if (isPreview) {
-                  statusEl.innerHTML = doneLine
-                    + '<br><br>In a real link this now opens Claude. '
-                    + '<a href="' + dest + '" target="_blank" rel="noopener">Open it anyway →</a>';
+                  statusEl.innerHTML = doneLine +
+                    '<br><br>In a real link this now opens ' + AI_LABELS[ai] + '. ' +
+                    '<a href="' + dest + '" target="_blank" rel="noopener">Open it anyway →</a>';
                   setTimeout(backToBuilder, 4000);
                 } else {
                   window.location.href = dest;
                 }
               }, 800);
-
             }, 180);
           }, 500);
         });
@@ -399,15 +613,8 @@ label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.
     builder.style.display = '';
   }
 
-  // ---- Auto-run from shared link ----
-  var params = new URLSearchParams(location.search);
-  var shared  = params.get('q');
-  if (shared && shared.trim()) {
-    // Small delay so page feels like it loaded intentionally
-    setTimeout(function () { runPlayer(shared.trim(), false); }, 400);
-  } else {
-    input.focus();
-  }
+  // Auto-focus
+  input.focus();
 
 })();
 </script>

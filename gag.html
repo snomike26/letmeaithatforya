@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let Me AI That For Ya</title>
+<meta name="description" content="Someone has a message for you...">
+<meta property="og:title" content="Let Me AI That For Ya 🤖">
+<meta property="og:description" content="Someone thinks you could have just asked AI...">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<style>
+:root {
+  --bg: #1a1714;
+  --panel: #262019;
+  --ink: #f5ede0;
+  --muted: #a8997f;
+  --rust: #d97757;
+  --line: #3a3128;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+}
+.wrap { width: 100%; max-width: 560px; padding: 20px 0; }
+
+/* ---- Loading / Error state ---- */
+.loading {
+  text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0;
+}
+.err-msg {
+  text-align: center; color: var(--rust); font-size: 14px; padding: 40px 0;
+}
+
+/* ---- Player ---- */
+.speech {
+  font-size: 17px; color: var(--ink); min-height: 28px; margin-bottom: 28px;
+  text-align: center;
+}
+.fakebar {
+  border: 1px solid var(--line); background: var(--panel); border-radius: 10px;
+  padding: 18px 18px 16px; box-shadow: 0 18px 50px rgba(0,0,0,.4);
+}
+.fakebar-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.fakebar-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.fakebar-dot.orange { background: #d97757; }
+.fakebar-label {
+  font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--rust); margin-left: 4px;
+}
+.typed-wrap {
+  min-height: 52px; color: var(--ink); border: 1px solid var(--line);
+  border-radius: 6px; padding: 12px 14px; margin-bottom: 12px;
+  font-size: 16px; line-height: 1.5; word-break: break-word;
+  background: var(--bg);
+}
+.cursor {
+  display: inline-block; width: 2px; height: 18px; background: var(--rust);
+  margin-left: 1px; vertical-align: -3px;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.sendrow {
+  display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+}
+.model-badge { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+.fakesend {
+  background: var(--rust); color: #1a1714; border-radius: 6px;
+  padding: 8px 18px; font-weight: 700; font-size: 13px;
+  transition: transform .1s, opacity .1s; font-family: inherit;
+  cursor: default; letter-spacing: 0.03em;
+}
+.fakesend.press { transform: scale(.93); opacity: .85; }
+
+/* ---- Cost reveal panel ---- */
+.cost-panel {
+  display: none;
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--panel);
+  padding: 28px 24px 22px;
+  text-align: center;
+  animation: rise .4s ease;
+}
+.cost-panel.show { display: block; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.cost-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.cost-number {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 8vw, 64px);
+  font-weight: 400;
+  color: var(--rust);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.cost-tokens {
+  font-size: 13px; color: var(--muted); margin-bottom: 16px;
+}
+.cost-tokens span { color: var(--ink); }
+.cost-sarcasm {
+  font-size: 14px; color: var(--muted); font-style: italic;
+  margin-bottom: 24px; line-height: 1.5;
+}
+.answer-btn {
+  display: inline-block;
+  background: var(--rust); color: #1a1714;
+  font-family: inherit; font-weight: 700; font-size: 14px;
+  padding: 12px 28px; border-radius: 2px;
+  text-decoration: none; letter-spacing: 0.04em;
+  transition: background .15s; cursor: pointer; border: none;
+}
+.answer-btn:hover { background: #e88a6c; }
+
+/* ---- Submitter badge ---- */
+.submitter-line {
+  margin-top: 14px; font-size: 12px; color: #6e6353;
+  text-align: center;
+}
+.submitter-line span { color: var(--muted); }
+
+/* ---- Footer ---- */
+.foot {
+  margin-top: 32px; text-align: center;
+  font-size: 12px; color: #6e6353;
+}
+.foot a {
+  color: var(--muted); text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.foot a:hover { color: var(--ink); }
+
+@media (max-width: 480px) {
+  .fakebar { padding: 14px 14px 12px; }
+  .typed-wrap { font-size: 15px; }
+  .cost-panel { padding: 20px 16px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor { animation: none; }
+  .cost-panel.show { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="loading" id="loading">Loading your message...</div>
+</div>
+
+<script>
+(function () {
+  var AI_URLS = {
+    claude:     'https://claude.ai/new?q=',
+    chatgpt:    'https://chatgpt.com/?q=',
+    perplexity: 'https://www.perplexity.ai/?q=',
+    gemini:     'https://gemini.google.com/app?q='
+  };
+
+  var AI_LABELS = {
+    claude: 'Claude',
+    chatgpt: 'ChatGPT',
+    perplexity: 'Perplexity',
+    gemini: 'Gemini'
+  };
+
+  var AI_BADGE = {
+    claude: 'claude sonnet',
+    chatgpt: 'gpt-4o',
+    perplexity: 'perplexity ai',
+    gemini: 'gemini pro'
+  };
+
+  var CURRENCY_SYMBOLS = { USD: '$', GBP: '£', EUR: '€', AED: 'د.إ' };
+  var CURRENCY_RATES   = { USD: 1.0, GBP: 0.79, EUR: 0.92, AED: 3.67 };
+
+  var SPEECH_LINES = [
+    'Oh wow, this was SO hard...',
+    'Took me absolutely forever to figure this out...',
+    'Really glad you asked me instead of, you know...',
+    'Let me just consult my incredibly advanced AI for this...',
+    'This one kept me up at night...',
+    'I cleared my entire schedule for this one...',
+    'Good thing you came to me and not the free AI chatbot...',
+    'Brb, summoning the power of artificial intelligence...',
+    'Wow. Just... wow.',
+    'I\'ve been training my whole life for this moment...'
+  ];
+
+  var SARCASM_LINES = [
+    "That's how much your laziness costs.",
+    "Hope it was worth asking.",
+    "You could have had this answered in 5 seconds.",
+    "A small price to pay for not thinking.",
+    "The AI doesn't judge. Unlike me.",
+    "This is what your time is worth, apparently.",
+    "Completely worth asking someone else.",
+    "Money well spent on asking a human.",
+    "For the record: you could have just typed this.",
+    "Next time, maybe try asking the free AI first?"
+  ];
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function formatCost(costUsd, currency) {
+    var rate = CURRENCY_RATES[currency] || 1;
+    var symbol = CURRENCY_SYMBOLS[currency] || '$';
+    var converted = costUsd * rate;
+    // Show more decimal places for tiny amounts
+    var decimals = converted < 0.01 ? 6 : converted < 1 ? 4 : 2;
+    return symbol + converted.toFixed(decimals);
+  }
+
+  // Get ?id= from URL
+  var params = new URLSearchParams(location.search);
+  var id = params.get('id');
+
+  if (!id) {
+    document.getElementById('loading').innerHTML =
+      '<div class="err-msg">No link ID found. <a href="/" style="color:var(--rust);border-bottom:1px solid var(--rust);">Make your own →</a></div>';
+    return;
+  }
+
+  // Fetch query data
+  fetch('/.netlify/functions/query?id=' + encodeURIComponent(id))
+    .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+    .then(function (res) {
+      if (!res.ok) {
+        document.getElementById('loading').outerHTML =
+          '<div class="err-msg" style="text-align:center;padding:40px 0;">' +
+          (res.data.error || 'Link not found.') +
+          '<br><br><a href="/" style="color:var(--rust);border-bottom:1px solid var(--rust);">Make your own →</a></div>';
+        return;
+      }
+      renderPage(res.data);
+    })
+    .catch(function () {
+      document.getElementById('loading').outerHTML =
+        '<div class="err-msg" style="text-align:center;padding:40px 0;">Couldn\'t load this link. ' +
+        '<a href="/" style="color:var(--rust);border-bottom:1px solid var(--rust);">Make your own →</a></div>';
+    });
+
+  function renderPage(data) {
+    var query    = data.query || '';
+    var ai       = data.ai_target || 'claude';
+    var currency = data.currency || 'USD';
+    var costUsd  = parseFloat(data.est_cost_usd) || 0;
+    var tokens   = parseInt(data.est_tokens) || 0;
+    var submitter = data.submitter || null;
+
+    var aiLabel  = AI_LABELS[ai] || 'Claude';
+    var aiBadge  = AI_BADGE[ai] || 'claude sonnet';
+    var destUrl  = (AI_URLS[ai] || AI_URLS.claude) + encodeURIComponent(query);
+    var sarcasm  = pick(SARCASM_LINES);
+
+    var wrap = document.getElementById('wrap');
+    wrap.innerHTML =
+      '<div class="speech" id="speech"></div>' +
+      '<div class="fakebar">' +
+        '<div class="fakebar-header">' +
+          '<div class="fakebar-dot"></div>' +
+          '<div class="fakebar-dot orange"></div>' +
+          '<div class="fakebar-dot"></div>' +
+          '<span class="fakebar-label">' + escHtml(aiLabel) + '</span>' +
+        '</div>' +
+        '<div class="typed-wrap">' +
+          '<span id="typed"></span><span class="cursor" id="cur" style="display:none"></span>' +
+        '</div>' +
+        '<div class="sendrow">' +
+          '<span class="model-badge">' + escHtml(aiBadge) + '</span>' +
+          '<span class="fakesend" id="fakesend">Send ↑</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cost-panel" id="cost-panel">' +
+        '<div class="cost-eyebrow">It would cost</div>' +
+        '<div class="cost-number" id="cost-number">' + escHtml(formatCost(costUsd, currency)) + '</div>' +
+        '<div class="cost-tokens">That\'s <span>' + tokens.toLocaleString() + ' tokens</span> of AI compute</div>' +
+        '<div class="cost-sarcasm">' + escHtml(sarcasm) + '</div>' +
+        '<a class="answer-btn" href="' + destUrl + '" target="_blank" rel="noopener">' +
+          'Fine, just answer it →' +
+        '</a>' +
+        (submitter ? '<div class="submitter-line">Sent by <span>' + escHtml(submitter) + '</span></div>' : '') +
+      '</div>' +
+      '<div class="foot">' +
+        '<a href="/">← Make your own</a>' +
+        ' &nbsp;·&nbsp; ' +
+        '<a href="/leaderboard">Leaderboard</a>' +
+      '</div>';
+
+    // Run animation
+    runAnimation(query, ai);
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function typeInto(target, text, speed, done) {
+    var i = 0;
+    target.textContent = '';
+    (function step() {
+      target.textContent = text.slice(0, i);
+      i++;
+      if (i <= text.length) setTimeout(step, speed + (Math.random() * speed * 0.4));
+      else if (done) done();
+    })();
+  }
+
+  function runAnimation(query, ai) {
+    var speechEl  = document.getElementById('speech');
+    var typedEl   = document.getElementById('typed');
+    var curEl     = document.getElementById('cur');
+    var fakesendEl = document.getElementById('fakesend');
+    var costPanel = document.getElementById('cost-panel');
+
+    var speechLine = pick(SPEECH_LINES);
+
+    typeInto(speechEl, speechLine, 32, function () {
+      setTimeout(function () {
+        curEl.style.display = 'inline-block';
+        typeInto(typedEl, query, 60, function () {
+          setTimeout(function () {
+            curEl.style.display = 'none';
+            fakesendEl.classList.add('press');
+            setTimeout(function () {
+              fakesendEl.classList.remove('press');
+              // Show cost reveal
+              setTimeout(function () {
+                costPanel.classList.add('show');
+              }, 300);
+            }, 180);
+          }, 500);
+        });
+      }, 600);
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
